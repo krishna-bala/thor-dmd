@@ -43,7 +43,7 @@ Modify the RViz configs if you choose to modify the message types using the prov
 
 Example usage (terminal): 
 
-```roslaunch useful_launch rosbag_velodyne_viz.launch velodyne_bag_file:=workspace/DATA/RudenkoHumanTracking/ex1_run1.bag qualisys_bag_file:=workspace/DATA/RudenkoHumanTracking/Ex1_run1_qualisys.bag --screen```
+```roslaunch thor_velodyne_utils rosbag_velodyne_viz.launch velodyne_bag_file:=workspace/DATA/RudenkoHumanTracking/ex1_run1.bag qualisys_bag_file:=workspace/DATA/RudenkoHumanTracking/Ex1_run1_qualisys.bag --screen```
 
 Arguments to roslaunch:
 1. `velodyne_bag_file`: relative path from your HOME folder of a bag containing the velodyne_packets topic.

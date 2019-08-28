@@ -11,7 +11,7 @@
 
     <include file="$(find thor_velodyne_utils)/launch/vlp16points.launch" />
 
-    <node name="rviz" pkg="rviz" type="rviz" args="-d velodyne_with_people.rviz"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find thor_velodyne_utils)/velodyne_with_people.rviz"/>
 
     <!-- This is optional -->
     <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
