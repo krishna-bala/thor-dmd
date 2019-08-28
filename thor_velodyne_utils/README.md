@@ -5,9 +5,7 @@
 #### get_transform.m
 Calculates and returns Translation and RPY vectors for the Velodyne frame w.r.t the Qualisys frame.
 
-Example usage (MATLAB):
-
-```[T, R] = get_transform('Ex_1_run_1.mat')```
+Example usage (MATLAB):`[T, R] = get_transform('Ex_1_run_1.mat')`
 
 where 'Ex_1_run_1.mat' is the .mat file containing the Qualisys tracks from Experiment 1, run 1.
 Returned values: `T` is the translation vector and `R` is the RPY vector of the Velodyne frame.
@@ -19,9 +17,7 @@ Doesn't replay messages from .mat file. It plays it out. Record them and use oth
 
 You probably don't need this file unless you wish to change the message type of the tracked objects.
 
-Example usage (MATLAB):
-
-```mat2ROS('Ex_1_run_1.mat')```
+Example usage (MATLAB):`mat2ROS('Ex_1_run_1.mat')`
 
 #### fix_bag_msg_def
 Once you have run `mat2ROS` from within matlab (after running roscore and rosbag record -a), use this script to clean out the generated bag file.
