@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="velodyne_bag_file" default="" />
+    <arg name="qualisys_bag_file" default="" />
+    <arg name="max_range" default="130.0" />
+    <arg name="min_range" default="1.0" />
+
+    <!-- Lets run both the bags -->
+    <param name="use_sim_time" value="true" />
+    <node name="rosbag_play" pkg="rosbag" type="play" args="$(env HOME)/$(arg velodyne_bag_file) $(env HOME)/$(arg qualisys_bag_file) --clock"/>
+
+    <include file="$(find thor_velodyne_utils)/launch/vlp16points.launch" />
+
+    <node name="rviz" pkg="rviz" type="rviz" args="-d velodyne_with_people.rviz"/>
+
+    <!-- This is optional -->
+    <node pkg="octomap_server" type="octomap_server_node" name="octomap_server">
+        <remap from="cloud_in" to="velodyne_points"/>
+        <param name="frame_id" value="map"/>
+        <param name="resolution" value="0.1"/>
+
+        <param name="base_frame_id" value="velodyne" />
+
+        <param name="sensor_model/max_range" value="$(arg max_range)"/>
+        <param name="sensor_model/min_range" value="$(arg min_range)"/>
+
+        <param name="pointcloud_max_z" value="3"/>
+        <param name="pointcloud_min_z" value="-1.5"/>
+
+        <param name="occupancy_min_z" value="-1.3"/>
+        <param name="occupancy_max_z" value="2"/>
+    </node>
+
+    <!-- Pasting output from the matlab script -->
+    <node name="velodyne_tf" pkg="tf" type="static_transform_publisher" args="4.9019 1.5956 1.5814 2.3545 0.0322 0.0621 map velodyne 20" />
+</launch>
