@@ -1,4 +1,4 @@
-function mat2ROSmsg(matFileLocation, matFileName)
+function mat2ROS(matFileLocation, matFileName)
 
 % First we load the mat file.
 matFileStruct = load(matFileLocation + matFileName);
