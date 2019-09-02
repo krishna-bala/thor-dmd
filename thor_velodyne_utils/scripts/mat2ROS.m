@@ -1,7 +1,7 @@
-function mat2ROSmsg(matFileName)
+function mat2ROSmsg(matFileLocation, matFileName)
 
 % First we load the mat file.
-matFileStruct = load(matFileName);
+matFileStruct = load(matFileLocation + matFileName);
 
 % What's the name of the structure element? 
 elemName = strtok(matFileName, '.');
@@ -15,7 +15,18 @@ stampstr = strtok(regexprep(strtrim(matFileStruct.(elemName).Timestamp), '\t', '
 
 % Qualisys doesn't include the milliseconds as part of the time stamp. 
 % We obtain this value from the TSV file. 
-stamp = datetime(stampstr, 'InputFormat','yyyy-MM-dd, HH:mm:ss', 'TimeZone', 'Europe/Zurich') + milliseconds(979)
+% Replace this value with correct value from the following (obtained from
+% the TSV files exported from Qualisys.
+% ex1_run1 = 979 ms
+% ex1_run2 = 565 ms
+% ex1_run3 = 577 ms
+% ex1_run4 = 817 ms
+% ex2_run5 = 361 ms
+% ex3_run1 = 645 ms
+% ex3_run2 = 289 ms
+% ex3_run3 = 622 ms
+% ex3_run4 = 236 ms
+stamp = datetime(stampstr, 'InputFormat','yyyy-MM-dd, HH:mm:ss', 'TimeZone', 'Europe/Zurich') + milliseconds(236)
 stamp_secs = posixtime(stamp)
 
 for i = 1:13
