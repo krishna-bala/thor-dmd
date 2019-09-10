@@ -1,6 +1,6 @@
 ## A package providing utilities for the THÖR dataset.
 
-### DESCRIPTION OF FILES
+### Description of Script and Launch files. 
 
 #### get_transform.m
 Calculates and returns Translation and RPY vectors for the Velodyne frame w.r.t the Qualisys frame.
@@ -50,3 +50,31 @@ Arguments to roslaunch:
 2. `qualisys_bag_file`: relative path from your HOME folder of a bag containing the Qualisys tracks as geometry_msgs/PointStamped messages. 
 
 
+### Description of bag files
+
+#### Velodyne bag files
+
+Each velodyne bag contains messages of type `velodyne_msgs/VelodyneScan` under the topic `velodyne_packets`.
+An launch file is provided in the `thor_velodyne_utils` package that is an example of how the data can be unpacked and visualized in the ROS framework.   
+There are additional messages in the bag that can be safely ignored.
+
+#### Qualisys bag files
+
+Each Qualisys bag contains 12 topics each containing `geometry_msgs/PoseStamped` messages.
+The topic names are related to rigid bodies tracked by the Qualisys system. 
+These mappings are provided below:
+
+| Qualisys object | Topic name |
+|-----------------|------------|
+| Helmet 2        | object_3   |
+| Helmet 3        | object_4   |
+| Helmet 4        | object_5   |
+| Helmet 5        | object_6   |
+| Helmet 6        | object_7   |
+| Helmet 7        | object_8   |
+| Helmet 8        | object_9   |
+| Helmet 9        | object_10  |
+| Helmet 10       | object_11  |
+| Velodyne LIDAR  | object_12  |
+| Robot           | object_13  | 
+ 
