@@ -4,7 +4,7 @@ close all
 load_data
 
 % Plot each of the three experiments in a separate figure
-for exp_id=1:3
+for exp_id=2:2
     figure
     hold on
     axis equal

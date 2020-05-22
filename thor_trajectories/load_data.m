@@ -1,18 +1,18 @@
 % Load all recordings
 
-load('Ex_1_run_1')
-load('Ex_1_run_2')
-load('Ex_1_run_3')
-load('Ex_1_run_4')
-load('Ex_2_run_1')
-load('Ex_2_run_2')
-load('Ex_2_run_3')
-load('Ex_2_run_4')
-load('Ex_2_run_5')
-load('Ex_3_run_1')
-load('Ex_3_run_2')
-load('Ex_3_run_3')
-load('Ex_3_run_4')
+load('Exp_1_run_1')
+load('Exp_1_run_2')
+load('Exp_1_run_3')
+load('Exp_1_run_4')
+load('Exp_2_run_1')
+load('Exp_2_run_2')
+load('Exp_2_run_3')
+load('Exp_2_run_4')
+load('Exp_2_run_5')
+load('Exp_3_run_1')
+load('Exp_3_run_2')
+load('Exp_3_run_3')
+load('Exp_3_run_4')
 
 exp{1} = {Experiment_1_run_1_0050,Experiment_1_run_2_0051,Experiment_1_run_3_0052,Experiment_1_run_4_0053};
 exp{2} = {Experiment_2_run_1_0054,Experiment_2_run_2_0055,Experiment_2_run_3_0056,Experiment_2_run_4_0057,Experiment_2_run_5_0058};

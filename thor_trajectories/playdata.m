@@ -3,10 +3,11 @@ close all
 % Speed of the saved video, e.g 3x real time
 % Amount of skipped frames to accelerate the rendering
 
-speed = 3;
-frame_skip = 4;
+speed = 30;
+frame_skip = 160;
+body_id_pos = [];
 
-for exp_id = 1:3
+for exp_id = 2:2
     for round_id = 1:length(exp{exp_id})
         close all
         clear M
@@ -25,6 +26,8 @@ for exp_id = 1:3
                 if(isnan(pos))
                     pos = [19999,19999];
                 end
+                body_id_pos(2*((round_id*body_id)-2)+1,(t+frame_skip-1)/frame_skip) = pos(1);
+                body_id_pos(2*((round_id*body_id)-2)+2,(t+frame_skip-1)/frame_skip) = pos(2);
                 plot(pos(1),pos(2),'.','MarkerSize',30,'Color',body_colors(body_id,:))
                 if(body_id<12)
                     text(pos(1),pos(2),int2str(body_id-1))
