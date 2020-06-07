@@ -284,21 +284,21 @@ for i = 1:trials
             stop  = segment{11,i}(k,2);
             
             if j == 11
-                X{k,i}(:,1)     = So{1,j,i}(start:stop)';
-                X{k,i}(:,2)     = So{2,j,i}(start:stop)';
-                X{k,i}(:,3)     = So{3,j,i}(start:stop)';
-                X{k,i}(:,4)     = So{4,j,i}(start:stop)';
-                X{k,i}(:,5)     = So{5,j,i}(start:stop)';
-                X{k,i}(:,6)     = So{6,j,i}(start:stop)';
-                U{k,j,i}(:,7)   = So{7,j,i}(start:stop)';
-                U{k,j,i}(:,8)   = So{8,j,i}(start:stop)';
+                X{k,i}(:,1)     = So{1,j,i}(start+25:stop-25)';
+                X{k,i}(:,2)     = So{2,j,i}(start+25:stop-25)';
+                X{k,i}(:,3)     = So{3,j,i}(start+25:stop-25)';
+                X{k,i}(:,4)     = So{4,j,i}(start+25:stop-25)';
+                X{k,i}(:,5)     = So{5,j,i}(start+25:stop-25)';
+                X{k,i}(:,6)     = So{6,j,i}(start+25:stop-25)';
+                U{k,j,i}(:,7)   = So{7,j,i}(start+25:stop-25)';
+                U{k,j,i}(:,8)   = So{8,j,i}(start+25:stop-25)';
             else
-                U{k,j,i}(:,1) = So{1,j,i}(start:stop)';
-                U{k,j,i}(:,2) = So{2,j,i}(start:stop)';
-                U{k,j,i}(:,3) = So{3,j,i}(start:stop)';
-                U{k,j,i}(:,4) = So{4,j,i}(start:stop)';
-                U{k,j,i}(:,5) = So{5,j,i}(start:stop)';
-                U{k,j,i}(:,6) = So{6,j,i}(start:stop)';
+                U{k,j,i}(:,1) = So{1,j,i}(start+25:stop-25)';
+                U{k,j,i}(:,2) = So{2,j,i}(start+25:stop-25)';
+                U{k,j,i}(:,3) = So{3,j,i}(start+25:stop-25)';
+                U{k,j,i}(:,4) = So{4,j,i}(start+25:stop-25)';
+                U{k,j,i}(:,5) = So{5,j,i}(start+25:stop-25)';
+                U{k,j,i}(:,6) = So{6,j,i}(start+25:stop-25)';
             end
         end       
     end   
