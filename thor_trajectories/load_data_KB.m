@@ -47,7 +47,7 @@ for exp_id=1:3
     map{exp_id} = map{exp_id}';
     [obst_x{exp_id},obst_y{exp_id}] = find(map{exp_id} == 0);
     obst_x{exp_id} = obst_x{exp_id} * 10 - 11000;%7000;
-    obst_y{exp_id} = obcst_y{exp_id} * 10 - 10000;%6500;
+    obst_y{exp_id} = obst_y{exp_id} * 10 - 10000;%6500;
     shuffle = randperm(length(obst_x{exp_id}));
     obst_x{exp_id} = obst_x{exp_id}(shuffle);
     obst_y{exp_id} = obst_y{exp_id}(shuffle);
@@ -76,18 +76,20 @@ restore_data_from_markers
 %% Experiment 2 - eDMD & SINDy setup
 
 time = 0.01; % time between frames (100 Hz)
-So = NaN(7,50000,13,5);         % So = states x frame x agent_id x trial
+So = cell(8,13,5);  % So = states x agent_id x trial
+                    % Initializes 8x13x5 array of {0x0 double} cells
     
 
-                                % states:    (7x1)
+                                % states:    (8x1)
                                 %
-                                %   pos_x       (cm)
-                                %   pos_y       (cm)
-                                %   vel_x       (cm/s)
-                                %   vel_y       (cm/s)
-                                %   theta       (rad)
-                                %   abs_vel     (cm/s)
-                                %   goal_pos    (cm)
+                                %   pos_x           (cm)
+                                %   pos_y           (cm)
+                                %   vel_x           (cm/s)
+                                %   vel_y           (cm/s)
+                                %   theta           (rad)
+                                %   abs_vel         (cm/s)
+                                %   goal_pos_x      (cm)
+                                %   goal_pos_y      (cm)
 
                                 % agent_id:             (13x1)
                                 %
@@ -97,6 +99,12 @@ So = NaN(7,50000,13,5);         % So = states x frame x agent_id x trial
                                 %   agent11:    Helmet_10
                                 %   agent12:    Velodyne
                                 %   agent13:    Robot
+                                
+                                % trialss:    (5x1)
+                                % 
+                                %   trial1
+                                %   ...
+                                %   trial5
 
 vel_mov_avg = 25;               % number of frames to calculate moving average
 
@@ -110,8 +118,9 @@ segment = zeros(1,2,5);     % initialize segment to capture start/stop frames wh
                             % ego agent is on map (not NaN position) for
                             % each trial
 
+trials = 1;
 
-for i = 1:1                             % i = trial
+for i = 1:trials                             % i = trial
     
     num_frames = exp{1,2}{1,i}.Frames;  % frames in trial
     
@@ -124,19 +133,17 @@ for i = 1:1                             % i = trial
             
             x = exp{1,2}{1,i}.RigidBodies.Positions(j,1,k);         % current frame x pos
             y = exp{1,2}{1,i}.RigidBodies.Positions(j,2,k);         % current frame y pos
-            So(1,k,j,i) = x;            % set hyperparemeter 1 to x pos   (cm)
-            So(2,k,j,i) = y;            % set hyperparameter 2 to y pos   (cm)
-            
+
             if k == 1                   % if first frame, set prior position to zero
-                px0 = 0;
-                py0 = 0;
+                prev_x = NaN;
+                prev_y = NaN;
             else
-                px0 = So(1,k-1,j,i);    % set prior position to pos at prev frame
-                py0 = So(2,k-1,j,i);
+                prev_x = So{1,j,i}(k-1);    % set prior position to pos at prev frame
+                prev_y = So{2,j,i}(k-1);
             end
-            
-            dx = (So(1,k,j,i) - px0);                       % calculate change in x pos from prev frame to current frame
-            dy = (So(2,k,j,i) - py0);                       % calculate change in y pos from prev frame to current frame
+           
+            dx = (x - prev_x);                    % calculate change in x pos from prev frame to current frame
+            dy = (y - prev_y);                    % calculate change in y pos from prev frame to current frame
             
             vx_queue(mod(k,vel_mov_avg)+1) = dx/time;       % add instant x velocity to queue
             vy_queue(mod(k,vel_mov_avg)+1) = dy/time;       % add instant y velocity to queue
@@ -147,16 +154,11 @@ for i = 1:1                             % i = trial
             avg_vx  = mean(vx_queue);               % x velocity (cm/s) (moving avg)
             avg_vy  = mean(vy_queue);               % y velocity (cm/s) (moving avg)
             abs_vel = sqrt(avg_vx^2 + avg_vy^2);    % abs velocity (cm/s) (moving avg)
-            
             theta   = tan(dy/dx)*180/pi;            % orientation (in degrees)
-            
-            So(3,k,j,i) = avg_vx;   % set hyperparemeter 3 to vel_x   (cm/s)
-            So(4,k,j,i) = avg_vy;   % set hyperparameter 4 to vel_y   (cm/s)
-            So(5,k,j,i) = theta;    % set hyperparameter 5 to theta   (deg)
-            So(6,k,j,i) = abs_vel;  % set hyperparameter 6 to abs_vel (cm/s)
-            
+                        
             if(j == 11)                     % if agent of interest (helmet10, inspector)
-                
+                                
+                % Goal Position Conditional
                 if(~isnan(x) & ~isnan(y) )  % if current x,y pos not NaN
                     
                     if(abs_vel < 250)       % if arriving at goal position
@@ -164,7 +166,7 @@ for i = 1:1                             % i = trial
                         if Pg(1,3) == 0     % if no goal position set
                             
                             goal_counter = goal_counter + 1;
-                            Pg(goal_counter,:) = [So(1,k,j,i) So(2,k,j,i) k];
+                            Pg(goal_counter,:) = [x y k];
                             
                         else                % not the first goal position
                             
@@ -172,39 +174,37 @@ for i = 1:1                             % i = trial
                             prev_Pgy = Pg(goal_counter,2);
                             
                             if( sqrt((x - prev_Pgx)^2 + (y - prev_Pgy)^2) > 1000)   % If our new goal is more than 1m
-                                                                                    % away from the previous goal.
-                                                                                    
-                                goal_counter = goal_counter + 1;                    % Step goal_counter.
-                                Pg(goal_counter,:) = [So(1,k,j,i) So(2,k,j,i) k];   % Add curr frame coordinates 
-                                                                                    % to goal position matrix.
+                                                                                    % away from the previous goal.                                                                                   
+                                goal_counter = goal_counter + 1; 
+                                Pg(goal_counter,:) = [x y k];   % Add curr frame coordinates 
+                                                                % to goal position matrix.
                             end
                         end
                     end
                 else
                     if Pg(1,3) ~= 0 % if a goal position exists
                         
-                        prev_x = So(1,k-1,j,i);
-                        prev_y = So(2,k-1,j,i);
-                        
                         if ~isnan(prev_x) & ~isnan(prev_y) % if ego agent's prev_x and prev_y are in the map
                             
-                            goal_counter = goal_counter + 1;            % step goal_counter
+                            goal_counter = goal_counter + 1;        
                             Pg(goal_counter,:) = [prev_x prev_y k-1];   % add previous frame coordinates to goal position matrix
                             
                         end
                     end
                 end
-                
-                if k == 4630
-                    test = 0;
-                end
-                
-                if k ~= 1 % not first frame
+                               
+                % Segment Conditional
+                if k == 1 % first frame
                     
-                    prev_x = So(1,k-1,j,i);
-                    prev_y = So(2,k-1,j,i);
+                    if ~isnan(x) & isnan(y)     % if ego agent's coords are on map
+                        
+                        seg_counter = seg_counter + 1;  % new segment
+                        segment(seg_counter,1,i) = k;   % "start" frame for current segment
+                    end
                     
-                    if ~isnan(x) & ~isnan(y)     % if ego agent's coords are on map
+                else
+
+                    if ~isnan(x) & ~isnan(y)    % ego agent's coords are on map
 
                         if isnan(prev_x) & isnan(prev_y)   % if previous coords were not on map
                             
@@ -212,57 +212,81 @@ for i = 1:1                             % i = trial
                             segment(seg_counter,1,i) = k;   % "start" frame for current segment
                         end
                         
-                    else % ego agent's coords are not on map
+                    else    % ego agent's coords are not on map
                         
-                        if ~isnan(prev_x) & ~isnan(prev_y)          % if previous coords were on map
-                            segment(seg_counter,2,i) = k;   % "stop" frame for current segment
+                        if ~isnan(prev_x) & ~isnan(prev_y)    % previous coords were on map
+                            segment(seg_counter,2,i) = k-1;   % "stop" frame for current segment
                         end
                     end
-                    
-                else % first frame
-                    
-                    if ~isnan( x ) & isnan( y )     % if ego agent's coords are on map
-                        
-                        seg_counter = seg_counter + 1;  % new segment
-                        segment(seg_counter,1,i) = k;   % "start" frame for current segment
-                    end
+
                 end
                 
-            end
+                So{7,j,i} = [So{7,j,i}, Pg(end,1)];    % set hyperparameter 7 to goal xpos (cm/s)
+                So{8,j,i} = [So{8,j,i}, Pg(end,2)];    % set hyperparameter 8 to goal ypos (cm/s)
                 
+            end
+            
+            % Assign hyper-parameters
+            So{1,j,i} = [So{1,j,i}, x];            % set hyperparemeter 1 to x pos     (cm)
+            So{2,j,i} = [So{2,j,i}, y];            % set hyperparameter 2 to y pos     (cm)
+            So{3,j,i} = [So{3,j,i}, avg_vx];       % set hyperparemeter 3 to vel_x     (cm/s)
+            So{4,j,i} = [So{4,j,i}, avg_vy];       % set hyperparameter 4 to vel_y     (cm/s)
+            So{5,j,i} = [So{5,j,i}, theta];        % set hyperparameter 5 to theta     (deg)
+            So{6,j,i} = [So{6,j,i}, abs_vel];      % set hyperparameter 6 to abs_vel   (cm/s)
+
+    
             if dy < 0
                 if dx < 0
-                    So(5,k,j,i) =  So(5,k,j,i) + 180;
+                    So{5,j,i}(end) =  So{5,j,i}(end) + 180;
                 else
-                    So(5,k,j,i) =  360 - So(5,k,j,i);
+                    So{5,j,i}(end) =  360 - So{5,j,i}(end);
                 end
             end     
         end
     end
 end
 
-seg1_trial1 = So(:,segment(1,1,1):segment(1,2,1),:,1);
+X = cell(8,5);
 
-X = seg1_trial1(:,:,11,:);
-
-
-for i = 1:length(Pg)
-    if i = 1
-        X(7,segment(1,1,1):Pg(i+1,3), 11, 1);
-    elseif i ~= length(Pg)
-        if Pg(i,3) < segment(1,1,1)
-        
-
-        
-
-x = 1:(segment(1,2,1)-segment(1,1,1) + 1);
-y = seg1_trial1(6,:,11,1);
+figure(1)
+x = 1:k;
+y = So(6,1:k,11,1);
 figure(1)
 plot(x,y)
-legend('Helmet10 Abs Vel, Seg 1')
+legend('Helmet10 Abs Vel')
 xlabel('Frame')
 ylabel('cm/s')
 title('Abs Vel vs Frame')
+
+figure(2)
+y1 = So(7,1:k,11,1);
+y2 = So(8,1:k,11,1);
+plot(x,y1)
+hold on
+plot(x,y2)
+legend('Helmet10 goal x pos', 'Helmet10 goal y pos')
+xlabel('Frame (.01 sec)')
+ylabel('pos (cm)')
+title('Goal Pos vs Frame')
+
+
+% for i = 1:length(Pg)
+%     if i = 1
+%         X(7,segment(1,1,1):Pg(i+1,3), 11, 1);
+%     elseif i ~= length(Pg)
+%         if Pg(i,3) < segment(1,1,1)
+%         
+% 
+%         
+
+% x = 1:(segment(1,2,1)-segment(1,1,1) + 1);
+% y = seg1_trial1(6,:,11,1);
+% figure(1)
+% plot(x,y)
+% legend('Helmet10 Abs Vel, Seg 1')
+% xlabel('Frame')
+% ylabel('cm/s')
+% title('Abs Vel vs Frame')
 % 
 % figure(2)
 % y1 = So(1,1:k,11,1);
